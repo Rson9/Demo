@@ -6,6 +6,7 @@ const { failure, success } = require('../../utils/responses')
 const bcrypt = require('bcrypt')
 const { signJWT, verifyJWT } = require('../../utils/JWT')
 const Category = require('../../models/category')
+const Flavor = require('../../models/flavor')
 const router = express.Router()
 /**
  * @description 菜品分页查询
@@ -85,6 +86,66 @@ router.post('/status/:status', async (req, res) => {
     return res.json({
       code: 1,
       msg: "修改成功",
+    })
+  } catch (e) {
+    failure(res, e)
+  }
+})
+
+/**
+ * @description 根据分类id查询菜品
+ */
+
+router.get('/list', async (req, res) => {
+  try {
+    const { categoryId } = req.query
+    const dish = await Dish.findAll({
+      where: {
+        category_id: categoryId
+      }
+    })
+    return res.json({
+      code: 1,
+      msg: "查询成功",
+      data: dish
+    })
+  } catch (e) {
+    failure(res, e)
+  }
+
+})
+
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const dish = await Dish.findByPk(id, {
+      attributes: {
+        include: [
+          ['category_id', 'categoryId'],
+          [Sequelize.col('Category.name'), 'categoryName'],
+        ],
+        exclude: ['category_id']
+      },
+      include: [
+        {
+          model: Flavor,
+          as: 'flavors',
+          attributes: {
+            include: [['dish_id', 'dishId']],
+            exclude: ['dish_id']
+          }
+        },
+        {
+          model: Category,
+          attributes: []
+        }
+
+      ]
+    })
+    return res.json({
+      code: 1,
+      msg: "查询成功",
+      data: dish
     })
   } catch (e) {
     failure(res, e)

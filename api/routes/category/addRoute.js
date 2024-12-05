@@ -135,7 +135,7 @@ router.get('/list', async (req, res) => {
     return res.json({
       code: 1,
       msg: "查询成功",
-      data: { user }
+      data: user
     })
   } catch (e) {
     failure(res, e)

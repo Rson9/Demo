@@ -1,11 +1,11 @@
 const sequelize = require('../config/mysql');
 const { Sequelize, DataTypes, Model } = require("sequelize");
-const Category = require('./category')
 const moment = require('moment');
 moment.locale('zh-cn');
 const bcrypt = require('bcrypt');
-const Flavor = require('./flavor');
-const Dish = sequelize.define('Dish', {
+const Dish = require('./dish');
+const setmealDish = require('./setmeal_dish');
+const Setmeal = sequelize.define('Setmeal', {
   // 模型属性
   id: {
     allowNull: false,
@@ -13,36 +13,37 @@ const Dish = sequelize.define('Dish', {
     primaryKey: true,
     type: DataTypes.INTEGER
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    allowEmpty: false
-  },
   category_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     allowEmpty: false
   },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    allowEmpty: false
+  },
   price: {
     type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    allowEmpty: false,
     get () {
-      const value = this.getDataValue('price')
-      return Number(value)
+      return Number(this.getDataValue('price'))
     }
-
   },
+  status: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  description: DataTypes.STRING,
   image: {
     type: DataTypes.STRING,
     validate: {
       isUrl: true
     }
   },
-  description: DataTypes.STRING,
-  status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
-  },
-
+  create_user: DataTypes.STRING,
+  update_user: DataTypes.STRING,
   createTime: {
     type: DataTypes.DATE,
     get () {
@@ -61,6 +62,9 @@ const Dish = sequelize.define('Dish', {
   updatedAt: 'updateTime',
   sequelize
 });
-Dish.hasMany(Flavor, { foreignKey: 'dish_id', as: 'flavors' })
-Flavor.belongsTo(Dish, { foreignKey: 'dish_id' })
-module.exports = Dish
+
+Setmeal.belongsToMany(Dish, { through: setmealDish, foreignKey: 'dish_id' })
+Dish.belongsToMany(Setmeal, { through: setmealDish, foreignKey: 'setmeal_id' })
+Setmeal.hasMany(setmealDish, { foreignKey: 'setmeal_id' })
+setmealDish.belongsTo(Setmeal, { foreignKey: 'setmeal_id' })
+module.exports = Setmeal

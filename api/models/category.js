@@ -1,6 +1,7 @@
 const sequelize = require('../config/mysql');
 const { Sequelize, DataTypes, Model } = require("sequelize");
 const Dish = require('./dish')
+const Setmeal = require('./setmeal')
 const moment = require('moment');
 moment.locale('zh-cn');
 const bcrypt = require('bcrypt');
@@ -55,4 +56,6 @@ const Category = sequelize.define('Category', {
 
 Category.hasMany(Dish, { foreignKey: 'category_id' })
 Dish.belongsTo(Category, { foreignKey: 'category_id' })
+Category.hasMany(Setmeal, { foreignKey: 'category_id' })
+Setmeal.belongsTo(Category, { foreignKey: 'category_id' })
 module.exports = Category

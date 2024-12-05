@@ -3,7 +3,7 @@ const { Sequelize, DataTypes, Model } = require("sequelize");
 const moment = require('moment');
 moment.locale('zh-cn');
 const bcrypt = require('bcrypt');
-const Employee = sequelize.define('employee', {
+const Employee = sequelize.define('Employee', {
   // 模型属性
   id: {
     allowNull: false,
