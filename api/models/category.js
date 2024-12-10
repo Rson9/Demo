@@ -30,8 +30,8 @@ const Category = sequelize.define('Category', {
     defaultValue: 0
   },
   status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
+    type: DataTypes.TINYINT,
+    defaultValue: 1
   },
   create_user: DataTypes.STRING,
   update_user: DataTypes.STRING,

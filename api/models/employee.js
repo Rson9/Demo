@@ -53,7 +53,10 @@ const Employee = sequelize.define('Employee', {
   phone: DataTypes.STRING,
   sex: DataTypes.STRING(2),
   idNumber: DataTypes.STRING,
-  status: DataTypes.BOOLEAN,
+  status: {
+    type: DataTypes.TINYINT,
+    defaultValue: 1
+  },
   create_user: DataTypes.STRING,
   update_user: DataTypes.STRING,
   createTime: {

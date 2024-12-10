@@ -33,14 +33,11 @@ const Dish = sequelize.define('Dish', {
   },
   image: {
     type: DataTypes.STRING,
-    validate: {
-      isUrl: true
-    }
   },
   description: DataTypes.STRING,
   status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
+    type: DataTypes.TINYINT,
+    defaultValue: 1
   },
 
   createTime: {

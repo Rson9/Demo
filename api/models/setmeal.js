@@ -32,15 +32,12 @@ const Setmeal = sequelize.define('Setmeal', {
     }
   },
   status: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
+    type: DataTypes.TINYINT,
+    defaultValue: 1
   },
   description: DataTypes.STRING,
   image: {
     type: DataTypes.STRING,
-    validate: {
-      isUrl: true
-    }
   },
   create_user: DataTypes.STRING,
   update_user: DataTypes.STRING,

@@ -12,9 +12,9 @@ const ShopStatus = sequelize.define('shopstatus', {
     type: DataTypes.INTEGER
   },
   status: {
-    type: DataTypes.BOOLEAN,
+    type: DataTypes.TINYINT,
     allowNull: false,
-    defaultValue: true,
+    defaultValue: 1,
   }
 }, {
   timestamps: false, // 启用时间戳

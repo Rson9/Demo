@@ -50,6 +50,12 @@ function failure (res, error) {
       errors: [error.message]
     })
   }
+  else if (error.name === 'SequelizeUniqueConstraintError') {
+    res.status(200).json({
+      code: 0,
+      msg: '菜品名已存在',
+    })
+  }
   else {
     res.status(500).json({
       code: 0,

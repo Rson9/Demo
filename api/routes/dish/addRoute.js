@@ -8,6 +8,7 @@ const { signJWT, verifyJWT } = require('../../utils/JWT')
 const Category = require('../../models/category')
 const Flavor = require('../../models/flavor')
 const router = express.Router()
+const upload = require('../../utils/upload')
 /**
  * @description 菜品分页查询
  */
@@ -115,6 +116,9 @@ router.get('/list', async (req, res) => {
 
 })
 
+/**
+ * @description 根据id查询菜品
+ */
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
@@ -146,6 +150,111 @@ router.get('/:id', async (req, res) => {
       code: 1,
       msg: "查询成功",
       data: dish
+    })
+  } catch (e) {
+    failure(res, e)
+  }
+})
+
+/**
+ * @description 菜品更新
+ * 
+ */
+router.put('/', upload.single('image'), async (req, res) => {
+  try {
+    let { categoryId, description, flavors, id, image, name, price, status } = req.body
+    //删除现有口味
+    await Flavor.destroy({
+      where: {
+        dish_id: id
+      }
+    })
+    //添加新的口味
+    const data = flavors.map(item => {
+      return {
+        dish_id: id,
+        name: item.name,
+        value: item.value
+      }
+    })
+    await Flavor.bulkCreate(data)
+
+
+    //更新菜品本身
+    const dish = await Dish.findByPk(id)
+    await dish.update({
+      category_id: categoryId,
+      description,
+      image,
+      name,
+      price,
+      status
+    })
+
+    return res.json({
+      code: 1,
+      msg: "修改成功",
+    })
+  } catch (e) {
+    failure(res, e)
+  }
+
+})
+
+/**
+ * @description 菜品新增
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { categoryId, description, flavors, image, name, price, status } = req.body
+
+    const dish = await Dish.create({
+      category_id: categoryId,
+      description,
+      image,
+      name,
+      price,
+      status
+    })
+    data = flavors.map(item => {
+      return {
+        dish_id: dish.id,
+        name: item.name,
+        value: item.value
+      }
+    })
+    await Flavor.bulkCreate(data)
+    return res.json({
+      code: 1,
+      msg: "添加成功",
+    })
+  } catch (e) {
+    failure(res, e)
+  }
+})
+
+/**
+ * @description 菜品删除
+ */
+router.delete('/', async (req, res) => {
+  try {
+    const ids = req.query.ids.split(',')
+    if (!ids) {
+      return res.json({
+        code: 0,
+        msg: "菜品未选择"
+      })
+    }
+    await Dish.destroy({
+      where: {
+        id: {
+          [Op.in]: ids
+        }
+      }
+    })
+    return res.json({
+      code: 1,
+      msg: "删除成功",
     })
   } catch (e) {
     failure(res, e)

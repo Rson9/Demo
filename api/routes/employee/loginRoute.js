@@ -163,6 +163,7 @@ router.get("/page", async (req, res) => {
 router.post("/status/:status", async (req, res) => {
   try {
     const status = req.params.status
+
     const id = req.query.id
     const user = await Employee.findByPk(id)
     if (!user) {

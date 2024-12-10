@@ -103,6 +103,7 @@ router.get('/:id', async (req, res) => {
 router.post('/status/:status', async (req, res) => {
   try {
     const { status } = req.params
+
     const { id } = req.query
     const user = await Setmeal.findByPk(id)
     await user.update({ status })
@@ -143,18 +144,29 @@ router.delete('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { categoryId, description, image, name, price, setmealDishes, status } = req.body
-    const dishdata = setmealDishes.map(item => {
-      copies, dishId, id, name, price, setmealId
-    }
-    )
-    //查询分类是否存在
-    const category = await Category.findByPk(categoryId)
-    if (!category) {
-      return res.json({
-        code: 0,
-        msg: "分类不存在"
+
+    //创建套餐
+    const setmeal = await Setmeal.create({
+      category_id: categoryId,
+      description,
+      image,
+      name,
+      price,
+      status
+    })
+
+    //创建中间表的对应关系
+    setmealDishes.forEach(async item => {
+      await SetmealDish.create({
+        dish_id: item.dishId,
+        setmeal_id: setmeal.id,
+        price: item.price,
+        name: item.name,
+        copies: item.copies
       })
-    }
+    });
+
+
 
     return res.json({
       code: 1,
@@ -165,4 +177,48 @@ router.post('/', async (req, res) => {
   }
 })
 
+/**
+ * @description 更新套餐
+ */
+router.put('/', async (req, res) => {
+  try {
+    const { id, categoryId, description, image, name, price, setmealDishes, status } = req.body
+
+    //更新套餐
+    await Setmeal.update({
+      category_id: categoryId,
+      description,
+      image,
+      name,
+      price,
+      status
+    }, { where: { id } })
+
+    const data = setmealDishes.map(item => {
+      return {
+        dish_id: item.dishId,
+        setmeal_id: id,
+        price: item.price,
+        name: item.name,
+        copies: item.copies
+      }
+    })
+
+    //删除原有菜品
+    await SetmealDish.destroy({
+      where: {
+        setmeal_id: id
+      }
+    })
+    //创建中间表的对应关系   
+    await SetmealDish.bulkCreate(data)
+
+    return res.json({
+      code: 1,
+      msg: "更新成功",
+    })
+  } catch (e) {
+    failure(res, e)
+  }
+})
 module.exports = router
