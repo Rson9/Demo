@@ -65,3 +65,26 @@
 2025/01/11 07:25:56 [error] 22#22: *18 no live upstreams while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/overviewOrders HTTP/1.1", upstream: "http://localhost/admin/workspace/overviewOrders", host: "localhost", referrer: "http://localhost/"
 2025/01/11 07:25:56 [error] 22#22: *19 no live upstreams while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/overviewDishes HTTP/1.1", upstream: "http://localhost/admin/workspace/overviewDishes", host: "localhost", referrer: "http://localhost/"
 2025/01/11 07:25:56 [error] 22#22: *20 no live upstreams while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/overviewSetmeals HTTP/1.1", upstream: "http://localhost/admin/workspace/overviewSetmeals", host: "localhost", referrer: "http://localhost/"
+2025/01/11 07:57:58 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:57:59 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:57:59 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:00 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:01 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:03 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:07 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:13 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:26 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:58:52 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 07:59:44 [emerg] 1#1: invalid host in upstream "http://host.docker.internal:8080" in /etc/nginx/nginx.conf:24
+2025/01/11 08:12:30 [emerg] 1#1: host not found in upstream "webservers" in /etc/nginx/nginx.conf:54
+2025/01/11 08:12:39 [emerg] 1#1: host not found in upstream "webservers" in /etc/nginx/nginx.conf:54
+2025/01/11 08:12:48 [emerg] 1#1: host not found in upstream "webservers" in /etc/nginx/nginx.conf:54
+2025/01/11 08:12:56 [emerg] 1#1: host not found in upstream "webservers" in /etc/nginx/nginx.conf:54
+2025/01/11 08:13:05 [emerg] 1#1: host not found in upstream "webservers" in /etc/nginx/nginx.conf:54
+2025/01/11 09:00:22 [error] 22#22: *7 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /ws/lom8s18lv8 HTTP/1.1", upstream: "http://192.168.65.254:8080/ws/lom8s18lv8", host: "localhost"
+2025/01/11 09:00:22 [error] 22#22: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/order/conditionSearch?page=1&pageSize=10&status=2 HTTP/1.1", upstream: "http://192.168.65.254:8080/admin/order/conditionSearch?page=1&pageSize=10&status=2", host: "localhost", referrer: "http://localhost/"
+2025/01/11 09:00:22 [error] 22#22: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/businessData HTTP/1.1", upstream: "http://192.168.65.254:8080/admin/workspace/businessData", host: "localhost", referrer: "http://localhost/"
+2025/01/11 09:00:22 [error] 22#22: *4 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/shop/status HTTP/1.1", upstream: "http://192.168.65.254:8080/admin/shop/status", host: "localhost", referrer: "http://localhost/"
+2025/01/11 09:00:22 [error] 22#22: *6 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/overviewDishes HTTP/1.1", upstream: "http://192.168.65.254:8080/admin/workspace/overviewDishes", host: "localhost", referrer: "http://localhost/"
+2025/01/11 09:00:22 [error] 22#22: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/overviewOrders HTTP/1.1", upstream: "http://192.168.65.254:8080/admin/workspace/overviewOrders", host: "localhost", referrer: "http://localhost/"
+2025/01/11 09:00:23 [error] 22#22: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: localhost, request: "GET /api/workspace/overviewSetmeals HTTP/1.1", upstream: "http://192.168.65.254:8080/admin/workspace/overviewSetmeals", host: "localhost", referrer: "http://localhost/"

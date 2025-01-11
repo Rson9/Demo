@@ -3,6 +3,7 @@ services:
     image: mysql:8.3.0
     container_name: mysql
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_LOWER_CASE_TABLE_NAMES=0
@@ -28,6 +29,7 @@ services:
     image: nginx:latest
     container_name: nginx
     restart: always
+    command: nginx -g 'daemon off;'
     ports:
       - '80:80'
     volumes:
