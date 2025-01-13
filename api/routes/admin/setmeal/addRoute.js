@@ -1,7 +1,5 @@
 const express = require("express")
-const Setmeal = require('@models/setmeal')
-const Category = require('@models/category')
-const SetmealDish = require('@models/setmeal_dish')
+const { Setmeal, Category, SetmealDish } = require('@models')
 const { Op, Sequelize } = require('sequelize')
 const { failure, success } = require('@utils/responses')
 const router = express.Router()
@@ -72,7 +70,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params
     const condition = {
-      attributes: { include: [['category_id', 'categoryId'], [Sequelize.col('Category.name'), 'categoryName']] },
+      attributes: { include: [[Sequelize.col('Category.name'), 'categoryName']] },
       include: [
         {
           model: Category,
@@ -128,7 +126,11 @@ router.delete('/', async (req, res) => {
         msg: "没选择套餐"
       })
     }
+
+    //删除套餐
     await Setmeal.destroy({ where: { id: { [Op.in]: ids } } })
+    //删除中间表对应关系
+    await SetmealDish.destroy({ where: { setmealId: { [Op.in]: ids } } })
     return res.json({
       code: 1,
       msg: "删除成功",
@@ -147,7 +149,7 @@ router.post('/', async (req, res) => {
 
     //创建套餐
     const setmeal = await Setmeal.create({
-      category_id: categoryId,
+      categoryId,
       description,
       image,
       name,
@@ -158,15 +160,13 @@ router.post('/', async (req, res) => {
     //创建中间表的对应关系
     setmealDishes.forEach(async item => {
       await SetmealDish.create({
-        dish_id: item.dishId,
-        setmeal_id: setmeal.id,
+        dishId: item.dishId,
+        setmealId: setmeal.id,
         price: item.price,
         name: item.name,
         copies: item.copies
       })
     });
-
-
 
     return res.json({
       code: 1,
@@ -186,7 +186,7 @@ router.put('/', async (req, res) => {
 
     //更新套餐
     await Setmeal.update({
-      category_id: categoryId,
+      categoryId,
       description,
       image,
       name,
@@ -196,8 +196,8 @@ router.put('/', async (req, res) => {
 
     const data = setmealDishes.map(item => {
       return {
-        dish_id: item.dishId,
-        setmeal_id: id,
+        dishId: item.dishId,
+        setmealId: id,
         price: item.price,
         name: item.name,
         copies: item.copies
@@ -207,7 +207,7 @@ router.put('/', async (req, res) => {
     //删除原有菜品
     await SetmealDish.destroy({
       where: {
-        setmeal_id: id
+        setmealId: id
       }
     })
     //创建中间表的对应关系   

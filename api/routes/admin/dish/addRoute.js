@@ -1,12 +1,7 @@
 const express = require("express")
-const Dish = require('@models/dish')
-const { Op, where, Sequelize } = require('sequelize')
-const { BadRequestError, NotFoundError } = require('@utils/errors')
+const { Op, Sequelize } = require('sequelize')
 const { failure, success } = require('@utils/responses')
-const bcrypt = require('bcrypt')
-const { signJWT, verifyJWT } = require('@utils/JWT')
-const Category = require('@models/category')
-const Flavor = require('@models/flavor')
+const { DishFlavor, Category, Dish } = require('@models')
 const router = express.Router()
 const upload = require('@utils/upload')
 /**
@@ -21,8 +16,6 @@ router.get('/page', async (req, res) => {
     const condition = {
       attributes: {
         include: [
-          ['create_user', 'createUser'],
-          ['update_user', 'updateUser'],
           [Sequelize.col('Category.name'), 'categoryName'],
           [Sequelize.col('Category.id'), 'categoryId'],
         ],
@@ -125,17 +118,15 @@ router.get('/:id', async (req, res) => {
     const dish = await Dish.findByPk(id, {
       attributes: {
         include: [
-          ['category_id', 'categoryId'],
           [Sequelize.col('Category.name'), 'categoryName'],
         ],
         exclude: ['category_id']
       },
       include: [
         {
-          model: Flavor,
+          model: DishFlavor,
           as: 'flavors',
           attributes: {
-            include: [['dish_id', 'dishId']],
             exclude: ['dish_id']
           }
         },
@@ -164,26 +155,26 @@ router.put('/', upload.single('image'), async (req, res) => {
   try {
     let { categoryId, description, flavors, id, image, name, price, status } = req.body
     //删除现有口味
-    await Flavor.destroy({
+    await DishFlavor.destroy({
       where: {
-        dish_id: id
+        dishId: id
       }
     })
     //添加新的口味
     const data = flavors.map(item => {
       return {
-        dish_id: id,
+        dishId: id,
         name: item.name,
         value: item.value
       }
     })
-    await Flavor.bulkCreate(data)
+    await DishFlavor.bulkCreate(data)
 
 
     //更新菜品本身
     const dish = await Dish.findByPk(id)
     await dish.update({
-      category_id: categoryId,
+      categoryId,
       description,
       image,
       name,
@@ -209,7 +200,7 @@ router.post('/', async (req, res) => {
     const { categoryId, description, flavors, image, name, price, status } = req.body
 
     const dish = await Dish.create({
-      category_id: categoryId,
+      categoryId,
       description,
       image,
       name,
@@ -218,12 +209,14 @@ router.post('/', async (req, res) => {
     })
     data = flavors.map(item => {
       return {
-        dish_id: dish.id,
+        dishId: dish.id,
         name: item.name,
         value: item.value
       }
     })
-    await Flavor.bulkCreate(data)
+    //批量添加口味
+    await DishFlavor.bulkCreate(data)
+
     return res.json({
       code: 1,
       msg: "添加成功",

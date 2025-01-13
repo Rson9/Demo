@@ -1,7 +1,5 @@
 const express = require("express")
-const Category = require('@models/category')
-const bcrypt = require('bcrypt')
-const { signJWT, verifyJWT } = require('@utils/JWT')
+const { Category } = require('@models')
 const { failure, success } = require('@utils/responses')
 const router = express.Router()
 /**
@@ -10,6 +8,7 @@ const router = express.Router()
 router.get('/list', async (req, res) => {
   try {
     const { type } = req.query
+
     let list
     if (!type) {
       list = await Category.findAll()

@@ -1,5 +1,5 @@
 const express = require("express")
-const Employee = require('@models/employee')
+const { Employee } = require('@models')
 const { Op } = require('sequelize')
 const { BadRequestError, NotFoundError } = require('@utils/errors')
 const { failure, success } = require('@utils/responses')
@@ -26,6 +26,7 @@ router.post('/login', async (req, res) => {
     }
 
     const isPasswordValid = bcrypt.compareSync(password, user.password)
+
     if (!isPasswordValid) {
       return res.json({
         code: 0,
@@ -106,7 +107,7 @@ router.post("/", async (req, res) => {
     if (!idNumber || !name || !phone || !sex || !username) {
       throw new BadRequestError('信息不完整')
     }
-    const user = await Employee.create({ idNumber: idNumber, name, phone, sex, username })
+    const user = await Employee.create({ idNumber, name, phone, sex, username })
     return res.json({
       code: 1,
       msg: "添加成功",
@@ -212,7 +213,7 @@ router.put('/', async (req, res) => {
     if (!user) {
       throw new NotFoundError('用户不存在')
     }
-    await user.update({ idNumber, name, phone, sex, username })
+    await user.update({ id_number: idNumber, name, phone, sex, username })
     return res.json({
       code: 1,
       msg: "修改成功",

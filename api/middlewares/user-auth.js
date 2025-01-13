@@ -1,4 +1,4 @@
-const User = require('@models/user')
+const { User } = require('@models')
 const { UnauthorizedError } = require('@utils/errors')
 const { verifyJWT } = require('@utils/JWT')
 const { failure } = require('@utils/responses')

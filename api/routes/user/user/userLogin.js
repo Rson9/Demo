@@ -1,6 +1,6 @@
 const express = require("express")
 const axios = require('axios')
-const User = require('@models/user')
+const { User } = require('@models')
 const bcrypt = require('bcrypt')
 const { signJWT, verifyJWT } = require('@utils/JWT')
 const { failure, success } = require('@utils/responses')

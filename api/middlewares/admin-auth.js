@@ -1,7 +1,7 @@
-const Employee = require('../models/employee')
-const { UnauthorizedError } = require('../utils/errors')
-const { verifyJWT } = require('../utils/JWT')
-const { failure } = require('../utils/responses')
+const { Employee } = require('@models')
+const { UnauthorizedError } = require('@utils/errors')
+const { verifyJWT } = require('@utils/JWT')
+const { failure } = require('@utils/responses')
 
 const adminAuth = async (req, res, next) => {
   try {

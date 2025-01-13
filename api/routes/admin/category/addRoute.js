@@ -1,10 +1,7 @@
 const express = require("express")
-const Category = require('@models/category')
-const { Op, where } = require('sequelize')
-const { BadRequestError, NotFoundError } = require('@utils/errors')
+const { Category } = require('@models')
+const { Op } = require('sequelize')
 const { failure, success } = require('@utils/responses')
-const bcrypt = require('bcrypt')
-const { signJWT, verifyJWT } = require('@utils/JWT')
 const router = express.Router()
 /**
  * @description 新增分类
@@ -12,7 +9,7 @@ const router = express.Router()
 router.post('/', async (req, res) => {
   try {
     const { name, sort, type } = req.body
-    const user = await Category.create({ name, sort, type })
+    await Category.create({ name, sort, type })
     return res.json({
       code: 1,
       msg: "添加成功",
@@ -33,7 +30,6 @@ router.get('/page', async (req, res) => {
     const pageSize = Math.abs(Number(query.pageSize)) || 10;
     const offset = (currentPage - 1) * pageSize
     const condition = {
-      attributes: { include: [['create_user', 'createUser'], ['update_user', 'updateUser']] },
       order: [['sort', 'asc']],
       offset: offset,
       limit: pageSize,
@@ -129,7 +125,6 @@ router.get('/list', async (req, res) => {
   try {
     const { type } = req.query
     const user = await Category.findAll({
-      attributes: { include: [['create_user', 'createUser'], ['update_user', 'updateUser']] },
       where: { type }
     })
     return res.json({

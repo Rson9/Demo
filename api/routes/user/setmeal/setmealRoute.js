@@ -1,7 +1,5 @@
 const express = require("express")
-const Setmeal = require('@models/setmeal')
-const SetmealDish = require('@models/setmeal_dish')
-const Dish = require('@models/dish')
+const { Setmeal, SetmealDish, Dish } = require('@models')
 const { failure, success } = require('@utils/responses')
 const { Sequelize } = require('sequelize')
 const router = express.Router()
@@ -11,6 +9,7 @@ const router = express.Router()
 router.get('/list', async (req, res) => {
   try {
     const { categoryId } = req.query
+
     const list = await Setmeal.findAll({
       where: {
         category_id: categoryId

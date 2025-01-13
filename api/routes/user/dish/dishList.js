@@ -1,10 +1,6 @@
 const express = require("express")
-const Dish = require('@models/dish')
-const Flavor = require('@models/flavor')
-const Category = require('@models/category')
+const { Dish, DishFlavor, Category } = require('@models')
 const { Sequelize } = require('sequelize')
-const bcrypt = require('bcrypt')
-const { signJWT, verifyJWT } = require('@utils/JWT')
 const { failure, success } = require('@utils/responses')
 const router = express.Router()
 /**
@@ -26,7 +22,7 @@ router.get('/list', async (req, res) => {
       },
       include: [
         {
-          model: Flavor,
+          model: DishFlavor,
           as: 'flavors',
           attributes: {
             include: [['dish_id', 'dishId']],

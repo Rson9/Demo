@@ -1,6 +1,6 @@
 const express = require("express")
 const { failure, success } = require('@utils/responses')
-const addressBook = require('@models/address_book')
+const { AddressBook } = require('@models')
 
 const router = express.Router()
 
@@ -10,22 +10,11 @@ const router = express.Router()
  */
 router.get('/list', async (req, res) => {
   try {
-    const userid = req.id
-    const addressList = await addressBook.findAll({
+    const userId = req.id
+    const addressList = await AddressBook.findAll({
       where: {
-        user_id: userid
-      },
-      attributes: [
-        'id', ['user_id', 'userId'],
-        'consignee', 'phone', 'sex',
-        ['province_code', 'provinceCode'],
-        ['province_name', 'provinceName'],
-        ['city_code', 'cityCode'],
-        ['city_name', 'cityName'],
-        ['district_name', 'districtName'],
-        ['district_code', 'districtCode'],
-        'detail', 'label',
-        ['is_default', 'isDefault']],
+        userId
+      }
     })
 
     return res.json({
@@ -47,12 +36,10 @@ router.get('/list', async (req, res) => {
  */
 router.put('/default', async (req, res) => {
   try {
-    const addressid = req.body.id
-
     //取消原来默认地址
-    await addressBook.update({ is_default: 0 }, { where: { is_default: 1, user_id: req.id } })
+    await AddressBook.update({ isDefault: 0 }, { where: { isDefault: 1, userId: req.id } })
     //设置新默认地址
-    await addressBook.update({ is_default: 1 }, { where: { id: addressid, user_id: req.id } })
+    await AddressBook.update({ isDefault: 1 }, { where: { id: req.body.id, userId: req.id } })
     return res.json({
       code: 1,
       msg: "设置成功",
@@ -67,7 +54,7 @@ router.put('/default', async (req, res) => {
  */
 router.get('/default', async (req, res) => {
   try {
-    const address = await addressBook.findOne({
+    const address = await AddressBook.findOne({
       where: {
         user_id: req.id,
         is_default: 1
@@ -99,15 +86,15 @@ router.get('/default', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { name, phone, type, sex,
-      provinceCode: province_code, provinceName: province_name, cityCode: city_code,
-      cityName: city_name, districtCode: district_code, districtName: district_name,
+      provinceCode, provinceName, cityCode,
+      cityName, districtCode, districtName,
       detail, label, consignee } = req.body
-    await addressBook.create({
-      user_id: req.id,
+    await AddressBook.create({
       name, phone, type, sex,
-      province_code, province_name, city_code,
-      city_name, district_code, district_name,
-      detail, label, consignee
+      provinceCode, provinceName, cityCode,
+      cityName, districtCode, districtName,
+      detail, label, consignee,
+      userId: req.id
     })
 
     return res.json({
@@ -128,7 +115,7 @@ router.put('/', async (req, res) => {
       provinceCode: province_code, provinceName: province_name, cityCode: city_code,
       cityName: city_name, districtCode: district_code, districtName: district_name,
       detail, label, consignee } = req.body
-    await addressBook.update({
+    await AddressBook.update({
       name, phone, type, sex,
       province_code, province_name, city_code,
       city_name, district_code, district_name,
@@ -150,7 +137,7 @@ router.put('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const address = await addressBook.findByPk(req.params.id, {
+    const address = await AddressBook.findByPk(req.params.id, {
       attributes: [
         'id', ['user_id', 'userId'],
         'consignee', 'phone', 'sex',
@@ -178,7 +165,7 @@ router.get('/:id', async (req, res) => {
  */
 router.delete('/', async (req, res) => {
   try {
-    await addressBook.destroy({ where: { id: req.body.id } })
+    await AddressBook.destroy({ where: { id: req.body.id } })
     return res.json({
       code: 1,
       msg: "删除成功",

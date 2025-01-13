@@ -1,8 +1,6 @@
 const express = require("express")
 const { failure, success } = require('@utils/responses')
-const ShoppingCart = require('@models/shopping_cart')
-const Dish = require('@models/dish')
-const Setmeal = require('../../../models/setmeal')
+const { ShoppingCart, Dish, Setmeal } = require('@models')
 const router = express.Router()
 
 /**
@@ -15,9 +13,9 @@ router.post('/add', async (req, res) => {
     if (!setmealId) {
       const dish = await ShoppingCart.findOne({
         where: {
-          dish_id: dishId,
-          user_id: req.id,
-          dish_flavor: dishFlavor
+          dishId,
+          userId: req.id,
+          dishFlavor
         }
       })
       if (dish) {
@@ -32,9 +30,9 @@ router.post('/add', async (req, res) => {
         await ShoppingCart.create({
           name: dishData.name,
           image: dishData.image,
-          dish_flavor: dishFlavor,
-          user_id: req.id,
-          dish_id: dishId,
+          dishFlavor,
+          userId: req.id,
+          dishId,
           amount: dishData.price
         })
       }
@@ -42,7 +40,7 @@ router.post('/add', async (req, res) => {
     else {
       const setmeal = await ShoppingCart.findOne({
         where: {
-          setmeal_id: setmealId,
+          setmealId,
           user_id: req.id
         }
       })
@@ -58,8 +56,8 @@ router.post('/add', async (req, res) => {
         await ShoppingCart.create({
           name: setmealData.name,
           image: setmealData.image,
-          user_id: req.id,
-          setmeal_id: setmealId,
+          userId: req.id,
+          setmealId,
           amount: setmealData.price
         })
       }
@@ -80,10 +78,6 @@ router.get('/list', async (req, res) => {
   try {
     const id = req.id
     const data = await ShoppingCart.findAll({
-      attributes: {
-        include: [['dish_flavor', 'dishFlavor'], ['setmeal_id', 'setmealId'], ['dish_id', 'dishId']],
-        exclude: ['dish_flavor', 'setmeal_id', 'dish_id']
-      },
       where: {
         user_id: id
       }
@@ -107,7 +101,7 @@ router.delete('/clean', async (req, res) => {
   try {
     await ShoppingCart.destroy({
       where: {
-        user_id: req.id
+        userId: req.id
       }
     })
     return res.json({
@@ -130,9 +124,9 @@ router.post('/sub', async (req, res) => {
     if (!setmealId) {
       const dish = await ShoppingCart.findOne({
         where: {
-          dish_id: dishId,
-          user_id: req.id,
-          dish_flavor: dishFlavor
+          dishId,
+          userId: req.id,
+          dishFlavor
         }
       })
       if (!dish) { }
@@ -146,8 +140,8 @@ router.post('/sub', async (req, res) => {
     else {
       const setmeal = await ShoppingCart.findOne({
         where: {
-          setmeal_id: setmealId,
-          user_id: req.id
+          setmealId,
+          userId: req.id
         }
       })
       if (!setmeal) { }
