@@ -1,5 +1,5 @@
-function success (res, msg, data, code = 200) {
-  res.status(code).json({
+function success (res, msg, data) {
+  res.json({
     code: 1,
     msg,
     data

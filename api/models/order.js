@@ -105,7 +105,10 @@ module.exports = (sequelize, DataTypes) => {
     cancelTime: {
       type: DataTypes.DATE,
       allowNull: true,
-      comment: '订单取消时间'
+      comment: '订单取消时间',
+      get () {
+        return this.getDataValue('cancelTime') ? moment(this.getDataValue('cancelTime')).format('YYYY-MM-DD HH:mm:ss') : null;
+      },
     },
     estimatedDeliveryTime: {
       type: DataTypes.DATE,

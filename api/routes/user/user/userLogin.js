@@ -5,15 +5,15 @@ const bcrypt = require('bcrypt')
 const { signJWT, verifyJWT } = require('@utils/JWT')
 const { failure, success } = require('@utils/responses')
 const router = express.Router()
-const APPID = 'wx52ff38c16d2f6779'
-const APPSECRET = '58c6d6ccadc6f73a0f69c90e09ff7bfe'
 
 /**
  * @description 用户登录
  */
 router.post('/login', async (req, res) => {
   try {
-    const { code } = req.body
+    const { code, name, avatar, sex } = req.body
+
+
     if (!code) {
       return res.status(400).json({
         code: 0,
@@ -22,8 +22,8 @@ router.post('/login', async (req, res) => {
     }
     const { data } = await axios.get('https://api.weixin.qq.com/sns/jscode2session', {
       params: {
-        appid: APPID,
-        secret: APPSECRET,
+        appid: process.env.APP_ID,
+        secret: process.env.APP_SECRET,
         js_code: code,
         grant_type: 'authorization_code'
       }
@@ -36,18 +36,22 @@ router.post('/login', async (req, res) => {
       })
     }
 
+    console.log(name, avatar, sex);
 
     //先查询是否存在，然后再创建用户
-    const [user, created] = await User.findCreateFind({
+    let user = await User.findOne({
       where: {
         openid: data.openid
       }
-    }, {
-      default: {
-        openid: data.openid
-      }
     })
-
+    if (!user) {
+      user = await User.create({
+        openid: data.openid,
+        name,
+        avatar,
+        sex
+      })
+    }
     return res.json({
       code: 1,
       msg: "登录成功",

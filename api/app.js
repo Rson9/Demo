@@ -6,11 +6,13 @@ const app = express()
 const { sequelize } = require('@models')
 const associations = require('@models/associations')
 
-const { adminLoginRoute, adminCategoryRoute, adminDishRoute, adminSetmealRoute, adminUploadRoute } = require('./exports/adminExport')
+const { adminWorkSpaceRoute, adminLoginRoute, adminOrderRoute,
+  adminCategoryRoute, adminDishRoute, adminSetmealRoute,
+  adminReportRoute, adminUploadRoute } = require('./exports/adminExport')
 const { userLoginRoute, userCategoryRoute, userDishRoute,
   userSetmealRoute, userShoppingCartRoute, userAddressBookRoute,
   userOrderRoute } = require('./exports/userExport')
-const shopRoute = require('./routes/shop/statusRoute')
+const ShopStatus = require('@routes/shop/statusRoute')
 // const cookieParser = require('cookie-parser')
 const adminAuth = require('./middlewares/admin-auth')
 const userAuth = require('./middlewares/user-auth')
@@ -39,14 +41,18 @@ init();
 
 // 后台管理端
 app.use('/admin/employee', adminAuth, adminLoginRoute);
+app.use('/admin/order', adminAuth, adminOrderRoute);
 app.use('/admin/category', adminAuth, adminCategoryRoute);
 app.use('/admin/dish', adminAuth, adminDishRoute);
-app.use('/admin/shop', adminAuth, shopRoute);
+app.use('/admin/shop', adminAuth, ShopStatus);
 app.use('/admin/setmeal', adminAuth, adminSetmealRoute);
+app.use('/admin/workspace', adminAuth, adminWorkSpaceRoute);
+app.use('/admin/report', adminAuth, adminReportRoute);
 app.use('/admin/common', adminUploadRoute);
 
 
 //微信小程序
+app.use('/user/shop', ShopStatus);
 app.use('/user/user', userLoginRoute);
 app.use('/user/category', userAuth, userCategoryRoute);
 app.use('/user/dish', userAuth, userDishRoute);

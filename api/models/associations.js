@@ -1,4 +1,4 @@
-const { Category, Dish, Setmeal, DishFlavor, SetmealDish, Order, OrderDetail } = require('./index')
+const { Category, Dish, Setmeal, DishFlavor, SetmealDish, Order, OrderDetail, AddressBook } = require('./index')
 
 module.exports = () => {
 
@@ -20,4 +20,8 @@ module.exports = () => {
   //订单表和订单详情表的关系
   Order.hasMany(OrderDetail, { foreignKey: 'orderId', as: 'orderDetailList' })
   OrderDetail.belongsTo(Order, { foreignKey: 'orderId' })
+
+  //订单表和地址表的关系
+  Order.belongsTo(AddressBook, { foreignKey: 'addressBookId' })
+  AddressBook.hasMany(Order, { foreignKey: 'addressBookId' })
 }
