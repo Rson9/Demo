@@ -3,7 +3,8 @@ const config = require('../config/mysql').development;
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   host: config.host,
   port: config.port,
-  dialect: config.dialect
+  dialect: config.dialect,
+  logging: false
 })
 
 const AddressBook = require('./address_book')

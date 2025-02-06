@@ -10,7 +10,8 @@
   "_moduleAliases": {
     "@routes": "./routes",
     "@models": "./models",
-    "@utils": "./utils"
+    "@utils": "./utils",
+    "@websocket": "./websocket"
   },
   "keywords": [],
   "author": "",

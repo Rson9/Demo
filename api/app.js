@@ -1,8 +1,10 @@
 require('dotenv').config()
 require('module-alias/register');
 const express = require('express')
+const WebSocket = require('ws')
 const app = express()
-
+const server = require('http').createServer(app);
+const ws = new WebSocket.Server({ server });
 const { sequelize } = require('@models')
 const associations = require('@models/associations')
 
@@ -13,6 +15,7 @@ const { userLoginRoute, userCategoryRoute, userDishRoute,
   userSetmealRoute, userShoppingCartRoute, userAddressBookRoute,
   userOrderRoute } = require('./exports/userExport')
 const ShopStatus = require('@routes/shop/statusRoute')
+const { socketHandler } = require('./websocket')
 // const cookieParser = require('cookie-parser')
 const adminAuth = require('./middlewares/admin-auth')
 const userAuth = require('./middlewares/user-auth')
@@ -61,7 +64,9 @@ app.use('/user/shoppingCart', userAuth, userShoppingCartRoute);
 app.use('/user/addressBook', userAuth, userAddressBookRoute);
 app.use('/user/order', userAuth, userOrderRoute);
 
+// 使用封装的 WebSocket 处理逻辑
+socketHandler(ws);
 
-app.listen(8080, () => {
+server.listen(8080, () => {
   console.log("server running at port 8080");
 })

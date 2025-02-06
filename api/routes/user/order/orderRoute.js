@@ -1,5 +1,6 @@
 const express = require('express')
 const { failure, success } = require('@utils/responses')
+const { reminder } = require('@websocket')
 const { Order, OrderDetail, AddressBook, sequelize, ShoppingCart, User } = require('@models')
 const router = express.Router()
 /**
@@ -155,6 +156,12 @@ router.post('/submit', async (req, res) => {
 router.put('/payment', async (req, res) => {
   try {
     //需要更新订单状态和支付状态
+    const order = await Order.findByPk(req.body.orderId)
+    await reminder({
+      orderId: req.body.orderId,
+      type: 1,
+      content: order.number
+    })
     return res.json({
       code: 1,
       data: {
@@ -213,9 +220,14 @@ router.post('/repetition/:id', async (req, res) => {
   }
 })
 
-// todo 催单，需要websocket 
+// 催单，需要websocket 
 router.get('/reminder/:id', async (req, res) => {
   try {
+    await reminder({
+      type: 2,
+      orderId: req.params.id,
+      content: '催单'
+    })
     return res.json({
       code: 1,
       msg: "催单成功",
