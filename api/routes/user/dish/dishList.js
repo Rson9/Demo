@@ -2,6 +2,7 @@ const express = require("express")
 const { Dish, DishFlavor, Category } = require('@models')
 const { Sequelize } = require('sequelize')
 const { failure, success } = require('@utils/responses')
+const redis = require('@utils/redis')
 const router = express.Router()
 /**
  * @description 条件查询
@@ -9,7 +10,17 @@ const router = express.Router()
 router.get('/list', async (req, res) => {
   try {
     const { categoryId } = req.query
-    const dish = await Dish.findAll({
+
+    if (!categoryId) {
+      return failure(res, "缺少分类ID参数")
+    }
+
+    const cacheKey = `dish:list:${categoryId}`
+    const cachedData = await redis.get(cacheKey)
+    if (cachedData) {
+      return success(res, "查询成功", JSON.parse(cachedData))
+    }
+    const resultData = await Dish.findAll({
       where: {
         category_id: categoryId
       },
@@ -36,11 +47,8 @@ router.get('/list', async (req, res) => {
 
       ]
     })
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: dish
-    })
+    await redis.setex(cacheKey, 3600, JSON.stringify(resultData))
+    return success(res, "查询成功", resultData)
   } catch (e) {
     failure(res, e)
   }

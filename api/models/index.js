@@ -1,5 +1,5 @@
 const { DataTypes, Sequelize } = require('sequelize');
-const config = require('../config/mysql').development;
+const config = require('@config/mysql').development;
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   host: config.host,
   port: config.port,
@@ -29,8 +29,6 @@ const Setmeal = require('./setmeal')
   (sequelize, DataTypes)
 const ShoppingCart = require('./shopping_cart')
   (sequelize, DataTypes)
-const ShopStatus = require('./shop_status')
-  (sequelize, DataTypes)
 const User = require('./user')
   (sequelize, DataTypes)
 module.exports = {
@@ -45,6 +43,5 @@ module.exports = {
   SetmealDish,
   Setmeal,
   ShoppingCart,
-  ShopStatus,
   User
 }

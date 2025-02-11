@@ -1,7 +1,7 @@
 const express = require("express")
-const { Setmeal, SetmealDish, Dish } = require('@models')
+const { Setmeal, Dish } = require('@models')
 const { failure, success } = require('@utils/responses')
-const { Sequelize } = require('sequelize')
+const redis = require('@utils/redis')
 const router = express.Router()
 /**
  * @description 条件查询
@@ -10,7 +10,21 @@ router.get('/list', async (req, res) => {
   try {
     const { categoryId } = req.query
 
-    const list = await Setmeal.findAll({
+    // 参数校验
+    if (!categoryId) {
+      return failure(res, "缺少分类ID参数");
+    }
+    // 构造 Redis 缓存键
+    const cacheKey = `setmeal:list:${categoryId}`;
+
+    // 1. 先尝试从 Redis 读取缓存
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+      // 2. 缓存命中直接返回
+      return success(res, "查询成功", JSON.parse(cachedData));
+    }
+    const resultData = await Setmeal.findAll({
       where: {
         category_id: categoryId
       },
@@ -23,11 +37,8 @@ router.get('/list', async (req, res) => {
         exclude: ['category_id', 'create_user', 'update_user']
       }
     })
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: list
-    })
+    await redis.setex(cacheKey, 3600, JSON.stringify(resultData));
+    return success(res, "查询成功", resultData)
   } catch (e) {
     failure(res, e)
   }
@@ -39,29 +50,30 @@ router.get('/list', async (req, res) => {
 router.get('/dish/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const list = await SetmealDish.findAll({
-      where: {
-        setmeal_id: id
-      },
-      attributes: [
-        [Sequelize.col('Dish.name'), 'name'],
-        [Sequelize.col('Dish.image'), 'image'],
-        [Sequelize.col('Dish.description'), 'description'],
-        'copies'
-      ],
+    const list = await Setmeal.findByPk(id
+      , {
+        attributes: [],
       include: [
         {
           model: Dish,
-          attributes: []
+          through: {
+            attributes: ['copies']
+          },
+          attributes: ['image', 'name', 'description']
         }
-      ]
+        ],
+    })
 
-    })
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: list
-    })
+    const resultData = list.toJSON().dishes.map(item => {
+      return {
+        image: item.image,
+        name: item.name,
+        description: item.description,
+        copies: item.setmeal_dish.copies
+      }
+    });
+
+    return success(res, "查询成功", resultData)
 
   } catch (e) {
     failure(res, e)

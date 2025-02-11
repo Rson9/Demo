@@ -1,6 +1,7 @@
 const express = require("express")
 const { failure, success } = require('@utils/responses')
 const { ShoppingCart, Dish, Setmeal } = require('@models')
+const redis = require('@utils/redis')
 const router = express.Router()
 
 /**
@@ -9,85 +10,48 @@ const router = express.Router()
 router.post('/add', async (req, res) => {
   try {
     const { dishFlavor, dishId, setmealId } = req.body
-    //添加的是菜品
-    if (!setmealId) {
-      const dish = await ShoppingCart.findOne({
-        where: {
-          dishId,
-          userId: req.id,
-          dishFlavor
-        }
-      })
-      if (dish) {
-        await dish.increment({ number: 1 });
-      } else {
-        const dishData = await Dish.findOne({
-          attributes: ['image', 'name', 'price'],
-          where: {
-            id: dishId
-          }
-        })
-        await ShoppingCart.create({
-          name: dishData.name,
-          image: dishData.image,
-          dishFlavor,
-          userId: req.id,
-          dishId,
-          amount: dishData.price
-        })
-      }
+    const userId = req.id;
+    const redisKey = `cart:${userId}`;
+    if (dishId) {
+      await addItemToCart('dish', userId, dishId, dishFlavor, redisKey);
+    } else if (setmealId) {
+      await addItemToCart('setmeal', userId, setmealId, null, redisKey);
     }
-    else {
-      const setmeal = await ShoppingCart.findOne({
-        where: {
-          setmealId,
-          user_id: req.id
-        }
-      })
-      if (setmeal) {
-        await setmeal.increment({ number: 1 });
-      } else {
-        const setmealData = await Setmeal.findOne({
-          attributes: ['image', 'name', 'price'],
-          where: {
-            id: setmealId
-          }
-        })
-        await ShoppingCart.create({
-          name: setmealData.name,
-          image: setmealData.image,
-          userId: req.id,
-          setmealId,
-          amount: setmealData.price
-        })
-      }
-    }
+
+    // 设置Redis键过期时间（7天）
+    await redis.expire(redisKey, 604800);
+
     return res.json({
       code: 1,
       msg: "添加成功",
-    })
+    });
   } catch (e) {
-    failure(res, e)
+    failure(res, e);
   }
-})
+});
 
 /**
  * @description 查看购物车
  */
 router.get('/list', async (req, res) => {
   try {
-    const id = req.id
-    const data = await ShoppingCart.findAll({
+    const userId = req.id
+    const redisKey = `cart:${userId}`
+    const redisData = await redis.hgetall(redisKey)
+    let resultData
+    if (Object.keys(redisData).length === 0) {
+      resultData = await ShoppingCart.findAll({
       where: {
-        user_id: id
-      }
-    })
+          userId
+        },
+        raw: true
+      })
+    } else {
+      resultData = Object.values(redisData).map(item =>
+        JSON.parse(item));
+    }
 
-    return res.json({
-      code: 1,
-      data: data,
-      msg: "查询成功",
-    })
+    return success(res, "查询成功", resultData)
   } catch (e) {
     failure(res, e)
   }
@@ -99,15 +63,14 @@ router.get('/list', async (req, res) => {
  */
 router.delete('/clean', async (req, res) => {
   try {
+    const userId = req.id
     await ShoppingCart.destroy({
       where: {
         userId: req.id
       }
     })
-    return res.json({
-      code: 1,
-      msg: "清空成功",
-    })
+    await redis.del(`cart:${userId}`)
+    return success(res, "清空成功")
   } catch (e) {
     failure(res, e)
   }
@@ -120,44 +83,109 @@ router.delete('/clean', async (req, res) => {
 router.post('/sub', async (req, res) => {
   try {
     const { dishFlavor, dishId, setmealId } = req.body
-    //删除的是菜品
-    if (!setmealId) {
-      const dish = await ShoppingCart.findOne({
-        where: {
-          dishId,
-          userId: req.id,
-          dishFlavor
-        }
-      })
-      if (!dish) { }
-      else if (dish.number === 1) {
-        await dish.destroy()
-      }
-      else {
-        await dish.decrement({ number: 1 });
-      }
+    const userId = req.id
+    const redisKey = `cart:${userId}`
+    if (dishId) {
+      await subItemToCart('dish', userId, dishId, dishFlavor, redisKey)
     }
-    else {
-      const setmeal = await ShoppingCart.findOne({
-        where: {
-          setmealId,
-          userId: req.id
-        }
-      })
-      if (!setmeal) { }
-      else if (setmeal.number === 1) {
-        await setmeal.destroy()
-      }
-      else {
-        await setmeal.decrement({ number: 1 });
-      }
+    else if (setmealId) {
+      await subItemToCart('setmeal', userId, setmealId, null, redisKey)
     }
-    return res.json({
-      code: 1,
-      msg: "删除成功",
-    })
+    return success(res, "删除成功")
   } catch (e) {
     failure(res, e)
   }
 })
+
+
+async function addItemToCart (type, userId, id, flavor, redisKey) {
+  try {
+    // 参数校验
+    if (!['dish', 'setmeal'].includes(type)) {
+      throw new Error('无效的商品类型');
+    }
+    if (!userId || !id) {
+      throw new Error('用户ID和商品ID不能为空');
+    }
+
+    const field = `${type}_${id}${flavor ? `_${flavor}` : ''}`;
+
+    // 检查是否已存在相同商品
+    const existingItem = await ShoppingCart.findOne({
+      where: {
+        userId,
+        [type === 'dish' ? 'dishId' : 'setmealId']: id,
+        dishFlavor: flavor || null
+      }
+    });
+
+    if (existingItem) {
+      // 存在 → 更新数量
+      await existingItem.increment('number', { by: 1 });
+      existingItem.number += 1;
+      await redis.hset(
+        redisKey,
+        field,
+        JSON.stringify({ ...existingItem.toJSON(), type })
+      );
+    } else {
+      // 不存在 → 创建新记录
+      const model = type === 'dish' ? Dish : Setmeal;
+      const data = await model.findOne({
+        attributes: ['image', 'name', 'price'],
+        where: { id }
+      });
+
+      if (!data) {
+        throw new Error('商品不存在或已被删除');
+      }
+
+      const newItem = {
+        name: data.name,
+        image: data.image,
+        dishFlavor: flavor || null,
+        [type === 'dish' ? 'dishId' : 'setmealId']: id,
+        userId,
+        amount: data.price,
+        number: 1
+      };
+
+      const createdItem = await ShoppingCart.create(newItem);
+
+      await redis.hset(
+        redisKey,
+        field,
+        JSON.stringify({ ...createdItem.toJSON(), type })
+      );
+    }
+  } catch (e) {
+    console.error('添加商品到购物车失败:', e);
+    failure(res, e)
+  }
+};
+
+async function subItemToCart (type, userId, id, flavor, redisKey) {
+  const field = `${type}_${id}${flavor ? `_${flavor}` : ''}`;
+
+  const existingItem = await ShoppingCart.findOne({
+    where: {
+      userId,
+      [type === 'dish' ? 'dishId' : 'setmealId']: id,
+      dishFlavor: flavor || null
+    }
+  });
+  if (existingItem) {
+    // 如果存在，更新数量
+    if (existingItem.number === 1) {
+      await existingItem.destroy();
+      await redis.hdel(redisKey, field);
+      }
+      else {
+      await existingItem.decrement('number', { by: 1 });
+      existingItem.number -= 1
+      await redis.hset(redisKey, field, JSON.stringify({ ...existingItem.toJSON(), type }));
+      }
+  }
+}
+
 module.exports = router

@@ -11,8 +11,12 @@ module.exports = () => {
   Dish.hasMany(DishFlavor, { foreignKey: 'dishId', as: 'flavors' })
   DishFlavor.belongsTo(Dish, { foreignKey: 'dishId' })
 
+
   Setmeal.hasMany(SetmealDish, { foreignKey: 'setmealId' })
   SetmealDish.belongsTo(Setmeal, { foreignKey: 'setmealId' })
+
+  // Dish.belongsTo(SetmealDish, { foreignKey: 'dishId' })
+  // SetmealDish.hasMany(Dish, { foreignKey: 'dishId' })
 
   Setmeal.belongsToMany(Dish, { through: SetmealDish, foreignKey: 'setmealId' })
   Dish.belongsToMany(Setmeal, { through: SetmealDish, foreignKey: 'dishId' })

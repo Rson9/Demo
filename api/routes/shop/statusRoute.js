@@ -1,18 +1,16 @@
 const express = require("express")
 const router = express.Router()
 const { success, failure } = require('../../utils/responses')
-const { ShopStatus } = require('@models')
+const redis = require('@utils/redis')
 /**
  * @description 获取营业状态
  */
 router.get('/status', async (req, res) => {
   try {
-    const { status } = await ShopStatus.findByPk(1, { attributes: ['status'] })
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: status
-    })
+    const status = await redis.get('status')
+    return success(res, "查询成功",
+      parseInt(status)
+    )
   } catch (e) {
     failure(res, e)
   }
@@ -24,11 +22,8 @@ router.get('/status', async (req, res) => {
 router.put('/:status', async (req, res) => {
   try {
     const { status } = req.params
-    await ShopStatus.update({ status }, { where: { id: 1 } })
-    return res.json({
-      code: 1,
-      msg: "修改成功",
-    })
+    await redis.set('status', status)
+    return success(res, "修改成功")
   } catch (e) {
     failure(res, e)
   }
