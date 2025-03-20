@@ -3,19 +3,18 @@ services:
     image: mysql:8.3.0
     container_name: mysql
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
-    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_LOWER_CASE_TABLE_NAMES=0
     ports:
       - '3306:3306'
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
     
   redis:
     image: redis:latest
     container_name: redis
-    restart: always
     volumes:
       - ./redis/data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
@@ -28,7 +27,6 @@ services:
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: always
     command: nginx -g 'daemon off;'
     ports:
       - '80:80'
