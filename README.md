@@ -36,7 +36,10 @@ docker-compose down
 
 首先确保启动了docker-compose，因为项目分为微信小程序端，商家后台端和api，
 微信小程序直接打开，后台端已经打包放在nginx目录中，可以直接运行
-api启动：
+后台服务启动：
 ```
-   
+# 进入api目录，下载依赖
+$ pnpm i
+# 运行项目
+$ pnpm run dev
 ```
