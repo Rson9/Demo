@@ -10,10 +10,7 @@ router.post('/', async (req, res) => {
   try {
     const { name, sort, type } = req.body
     await Category.create({ name, sort, type })
-    return res.json({
-      code: 1,
-      msg: "添加成功",
-    })
+    return success(res, "新增成功")
   } catch (e) {
     failure(res, e)
   }
@@ -49,14 +46,7 @@ router.get('/page', async (req, res) => {
     }
     const { rows, count } = await Category.findAndCountAll(condition)
 
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: {
-        total: count,
-        records: rows
-      }
-    })
+    return success(res, "查询成功", { total: count, records: rows })
   } catch (e) {
     failure(res, e)
   }
@@ -70,10 +60,7 @@ router.put('/', async (req, res) => {
     const { id, name, sort, type } = req.body
     const user = await Category.findByPk(id)
     await user.update({ name, sort, type })
-    return res.json({
-      code: 1,
-      msg: "修改成功",
-    })
+    return success(res, "修改成功")
 
   } catch (e) {
     failure(res, e)
@@ -90,10 +77,7 @@ router.delete('/', async (req, res) => {
     const { id } = req.query
     const user = await Category.findByPk(id)
     await user.destroy()
-    return res.json({
-      code: 1,
-      msg: "删除成功",
-    })
+    return success(res, "删除成功")
   } catch (e) {
     failure(res, e)
   }
@@ -108,10 +92,7 @@ router.post('/status/:status', async (req, res) => {
     const { id } = req.query
     const user = await Category.findByPk(id)
     await user.update({ status })
-    return res.json({
-      code: 1,
-      msg: "修改成功",
-    })
+    return success(res, "修改成功")
   } catch (e) {
     failure(res, e)
   }
@@ -127,11 +108,7 @@ router.get('/list', async (req, res) => {
     const user = await Category.findAll({
       where: { type }
     })
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: user
-    })
+    return success(res, "查询成功", user)
   } catch (e) {
     failure(res, e)
   }

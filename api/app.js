@@ -16,11 +16,9 @@ const { userLoginRoute, userCategoryRoute, userDishRoute,
   userOrderRoute } = require('./exports/userExport')
 const ShopStatus = require('@routes/shop/statusRoute')
 const { socketHandler } = require('./websocket')
-// const cookieParser = require('cookie-parser')
 const adminAuth = require('./middlewares/admin-auth')
 const userAuth = require('./middlewares/user-auth')
 
-// app.use(cookieParser())
 app.use(express.json())
 app.use(express.static('public')) //设置静态文件目录
 

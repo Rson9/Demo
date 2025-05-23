@@ -77,10 +77,7 @@ router.post('/status/:status', async (req, res) => {
     const { id } = req.query
     const user = await Dish.findByPk(id)
     await user.update({ status })
-    return res.json({
-      code: 1,
-      msg: "修改成功",
-    })
+    return success(res, "修改成功")
   } catch (e) {
     failure(res, e)
   }
@@ -98,11 +95,7 @@ router.get('/list', async (req, res) => {
         category_id: categoryId
       }
     })
-    return res.json({
-      code: 1,
-      msg: "查询成功",
-      data: dish
-    })
+    return success(res, "查询成功", dish)
   } catch (e) {
     failure(res, e)
   }
@@ -217,10 +210,7 @@ router.post('/', async (req, res) => {
     //批量添加口味
     await DishFlavor.bulkCreate(data)
 
-    return res.json({
-      code: 1,
-      msg: "添加成功",
-    })
+    return success(res, "新增成功")
   } catch (e) {
     failure(res, e)
   }
@@ -245,10 +235,7 @@ router.delete('/', async (req, res) => {
         }
       }
     })
-    return res.json({
-      code: 1,
-      msg: "删除成功",
-    })
+    return success(res, "删除成功")
   } catch (e) {
     failure(res, e)
   }

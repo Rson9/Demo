@@ -1,3 +1,4 @@
+//redis配置
 module.exports = {
   development: {
     host: 'localhost',

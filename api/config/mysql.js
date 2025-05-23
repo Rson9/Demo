@@ -1,3 +1,4 @@
+// mysql配置
 module.exports = {
   development: {
     username: 'root',
